@@ -46,5 +46,13 @@
   "dependencies": {
     "bitmovin-player": "^8.44.0",
     "bitmovin-player-ui": "^3.17.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SangNguyenTL/bitmovin-react-player"
+  },
+  "bugs": {
+    "url": "https://github.com/SangNguyenTL/bitmovin-react-player/issues"
+  },
+  "homepage": "https://github.com/SangNguyenTL/bitmovin-react-player#readme"
 }
