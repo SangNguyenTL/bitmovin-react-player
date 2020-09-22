@@ -2,3 +2,6 @@ src/**/__tests__/**
 rollup.config.js
 node_modules
 dist
+build
+.storybook
+storybook

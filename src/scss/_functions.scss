@@ -1,0 +1,3 @@
+@function svg($url) {
+  @return url('#{$url}');
+}

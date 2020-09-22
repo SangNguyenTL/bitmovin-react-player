@@ -1,13 +1,30 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Player, PlayerAPI, PlayerEvent } from 'bitmovin-player';
+import {
+  PlaybackConfig,
+  Player,
+  PlayerAPI,
+  SourceConfig,
+  StyleConfig
+} from 'bitmovin-player';
 import { UIFactory } from 'bitmovin-player-ui';
-import './index.scss';
+import mimeTypes from 'mime-types';
+import './scss/index.scss';
 
 export type BitMovinPlayerProps = {
   lincenseKey: string;
+  src: string;
+  source?: SourceConfig;
+  playback?: PlaybackConfig;
+  style?: StyleConfig;
 };
 
-const BitMovinPlayer: React.FC<BitMovinPlayerProps> = ({ lincenseKey }) => {
+const BitMovinPlayer: React.FC<BitMovinPlayerProps> = ({
+  lincenseKey,
+  src,
+  source,
+  playback,
+  style
+}) => {
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [player, setPlayer] = useState<PlayerAPI>();
 
@@ -15,12 +32,26 @@ const BitMovinPlayer: React.FC<BitMovinPlayerProps> = ({ lincenseKey }) => {
     (elementContainer: HTMLElement) => {
       return new Player(elementContainer, {
         key: lincenseKey,
-        ui: false
+        ui: false,
+        playback: playback || {},
+        style: style || {}
       });
     },
-    [lincenseKey]
+    [lincenseKey, playback, style]
   );
 
+  const processSource = useCallback(() => {
+    if (!src) return source || {};
+    const mime = mimeTypes.lookup(src);
+    let newSource: SourceConfig = {};
+    if (mime === 'application/vnd.apple.mpegurl') newSource.hls = src;
+    else if (mime === 'application/dash+xml') newSource.dash = src;
+    else if (mime) newSource.progressive = [{ url: src, type: mime }];
+    newSource = { ...source, ...newSource };
+    return newSource;
+  }, [src, source]);
+
+  // Create player
   useEffect(() => {
     if (playerWrapperRef.current) {
       const newPlayer = createPlayer(playerWrapperRef.current);
@@ -30,19 +61,8 @@ const BitMovinPlayer: React.FC<BitMovinPlayerProps> = ({ lincenseKey }) => {
   }, [createPlayer, playerWrapperRef]);
 
   useEffect(() => {
-    const playing = () => console.log('player is playing');
-    player?.on(PlayerEvent.Playing, playing);
-    const source = {
-      hls:
-        '//bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8'
-    };
-    player?.load(source).then(() => {
-      player.play();
-    });
-    return () => {
-      player?.off(PlayerEvent.Playing, playing);
-    };
-  }, [player]);
+    player?.load(processSource());
+  }, [processSource, player]);
 
   return <div ref={playerWrapperRef} />;
 };

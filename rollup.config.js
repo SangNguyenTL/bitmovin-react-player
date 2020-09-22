@@ -1,6 +1,10 @@
-import typescript from 'rollup-plugin-typescript2'
-import postcss from 'rollup-plugin-postcss'
-
+import typescript from "rollup-plugin-typescript2";
+import postcss from "rollup-plugin-postcss";
+import base64 from 'postcss-base64';
+import postSvg from 'postcss-svg';
+import inlineSvg from 'postcss-inline-svg';
+import sass from 'postcss-node-sass';
+import svgo from 'postcss-svgo';
 import pkg from './package.json'
 
 export default {
@@ -12,15 +16,21 @@ export default {
             exports: 'named',
             sourcemap: true,
             strict: false
-        }
+        },
     ],
     plugins: [
+        typescript({ useTsconfigDeclarationDir: true }),
         postcss({
             extract: true,
-            minimize: true,
-            use: ['sass'],
+            modules: false,
+            plugins: [
+                sass(),
+                postSvg({ dirs: ['./node_modules/bitmovin-player-ui/'] }),
+                base64(),
+                inlineSvg(),
+                svgo(),
+            ]
         }),
-        typescript({ objectHashIgnoreUnknownHack: true })
     ],
     external: ['react', 'react-dom']
 }
