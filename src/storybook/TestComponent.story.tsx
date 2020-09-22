@@ -1,4 +1,5 @@
 import React from 'react';
+import { storiesOf } from '@storybook/react';
 import BitMovinPlayer from '../index';
 
 export default {
@@ -51,3 +52,10 @@ export const TestSourceProps = () => (
     lincenseKey="9692e0b2-56b3-4c3e-88e4-cda5bd751517"
   />
 );
+
+storiesOf('BitMovinPlayer', module)
+  .add('HSLMTest', HSLMTest)
+  .add('DashTest', DashTest)
+  .add('Mp4Test', Mp4Test)
+  .add('TestSourceProps', TestSourceProps)
+  .add('WithPoster', WithPoster);

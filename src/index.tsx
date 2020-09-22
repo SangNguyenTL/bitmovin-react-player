@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Component } from 'react';
+import mimeTypes from 'mime-types';
 import {
   PlaybackConfig,
   Player,
@@ -7,10 +8,9 @@ import {
   StyleConfig
 } from 'bitmovin-player';
 import { UIFactory } from 'bitmovin-player-ui';
-import mimeTypes from 'mime-types';
 import './scss/index.scss';
 
-export type BitMovinPlayerProps = {
+export type BitmovinPlayerProps = {
   lincenseKey: string;
   src?: string;
   source?: SourceConfig;
@@ -18,29 +18,36 @@ export type BitMovinPlayerProps = {
   style?: StyleConfig;
 };
 
-const BitMovinPlayer: React.FC<BitMovinPlayerProps> = ({
-  lincenseKey,
-  src,
-  source,
-  playback,
-  style
-}) => {
-  const playerWrapperRef = useRef<HTMLDivElement>(null);
-  const [player, setPlayer] = useState<PlayerAPI>();
+class BitmovinPlayer extends Component<BitmovinPlayerProps> {
+  player: PlayerAPI | null;
 
-  const createPlayer = useCallback(
-    (elementContainer: HTMLElement) => {
-      return new Player(elementContainer, {
-        key: lincenseKey,
-        ui: false,
-        playback: playback || {},
-        style: style || {}
-      });
-    },
-    [lincenseKey, playback, style]
-  );
+  playerRef: HTMLDivElement | null = null;
 
-  const processSource = useCallback(() => {
+  constructor(props: BitmovinPlayerProps) {
+    super(props);
+    this.props = props;
+  }
+
+  componentDidMount(): void {
+    if (this.playerRef) this.player = this.createPlayer(this.playerRef);
+    if (this.player) {
+      UIFactory.buildDefaultSmallScreenUI(this.player);
+      this.player.load(this.processSource());
+    }
+  }
+
+  createPlayer = (elementContainer: HTMLElement): PlayerAPI => {
+    const { lincenseKey, playback, style } = this.props;
+    return new Player(elementContainer, {
+      key: lincenseKey,
+      ui: false,
+      playback: playback || {},
+      style: style || {}
+    });
+  };
+
+  processSource = (): SourceConfig => {
+    const { src, source } = this.props;
     if (!src) return source || {};
     const mime = mimeTypes.lookup(src);
     let newSource: SourceConfig = {};
@@ -49,22 +56,17 @@ const BitMovinPlayer: React.FC<BitMovinPlayerProps> = ({
     else if (mime) newSource.progressive = [{ url: src, type: mime }];
     newSource = { ...source, ...newSource };
     return newSource;
-  }, [src, source]);
+  };
 
-  // Create player
-  useEffect(() => {
-    if (playerWrapperRef.current) {
-      const newPlayer = createPlayer(playerWrapperRef.current);
-      UIFactory.buildDefaultSmallScreenUI(newPlayer);
-      setPlayer(newPlayer);
-    }
-  }, [createPlayer, playerWrapperRef]);
+  render(): JSX.Element {
+    return (
+      <div
+        ref={(ref) => {
+          this.playerRef = ref;
+        }}
+      />
+    );
+  }
+}
 
-  useEffect(() => {
-    player?.load(processSource());
-  }, [processSource, player]);
-
-  return <div ref={playerWrapperRef} />;
-};
-
-export default BitMovinPlayer;
+export default BitmovinPlayer;
