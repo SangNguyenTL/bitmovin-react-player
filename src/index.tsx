@@ -12,7 +12,7 @@ import './scss/index.scss';
 
 export type BitMovinPlayerProps = {
   lincenseKey: string;
-  src: string;
+  src?: string;
   source?: SourceConfig;
   playback?: PlaybackConfig;
   style?: StyleConfig;

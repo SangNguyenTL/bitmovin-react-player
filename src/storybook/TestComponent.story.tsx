@@ -36,3 +36,18 @@ export const Mp4Test = () => (
     lincenseKey="9692e0b2-56b3-4c3e-88e4-cda5bd751517"
   />
 );
+
+export const TestSourceProps = () => (
+  <BitMovinPlayer
+    source={{
+      progressive: [
+        {
+          url:
+            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+          type: 'video/mp4'
+        }
+      ]
+    }}
+    lincenseKey="9692e0b2-56b3-4c3e-88e4-cda5bd751517"
+  />
+);
